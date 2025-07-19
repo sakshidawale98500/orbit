@@ -1,0 +1,95 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Avanya Desi</title>
+  <link rel="stylesheet" href="./style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <header class="navbar">
+    <h1><a href="#">Ａvanya🌿Desi</a></h1>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search products..." />
+      <button onclick="searchProduct()">Search</button>
+    </div>
+    <button id="open-cart" class="cart-link">🛒 Cart</button>
+    <a href="user_orders.html" class="cart-link">🧾 My Orders</a>
+
+  </header>
+
+  <section class="product-section">
+   
+    <div id="product-container" class="product-container"></div>
+  </section>
+  <section class="product-section">
+    
+    
+    <div id="product-container" class="product-container"></div>
+  </section>
+
+  <!-- ✅ Cart Modal -->
+  <div id="cart-modal" class="cart-modal hidden">
+    <div class="cart-modal-content">
+      <span id="close-cart" class="close-cart">×</span>
+      <h2>Your Cart</h2>
+      <div id="cart-container" class="product-container"></div>
+      <h3 id="cart-total">Total: ₹0</h3>
+      <button id="clear-cart-btn" class="clear-cart">Clear Cart</button>
+      
+      <form id="order-form" style="margin-top: 20px;">
+        <h3>Customer Details</h3>
+        <input type="text" id="order-name" placeholder="Full Name" required /><br /><br />
+        <input type="email" id="order-email" placeholder="Email" required /><br /><br />
+        <input type="tel" id="order-phone" placeholder="Phone Number" required /><br /><br />
+        <input type="text" id="order-address" placeholder="Delivery Address" required /><br /><br />
+        <select id="order-payment" required>
+          <option value="">Select Payment Method</option>
+          <option value="COD">Cash on Delivery</option>
+          <option value="Online">Online Payment</option>
+        </select><br /><br />
+      </form>
+
+     <button type="button" class="place-order-btn" onclick="placeOrder()">Place Order</button>
+
+    </div>
+  </div>
+
+  
+  <div class="background-shapes">
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+</div>
+<div class="blob-background">
+  <div class="blob"></div>
+  <div class="blob"></div>
+  <div class="blob"></div>
+</div>
+
+  <!-- Place Order button -->
+  <!-- <button type="button" onclick="placeOrder()">Place Order</button> -->
+
+
+  <script src="./Script.js"></script>
+   <!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/685684c4552cdd190f7b503d/1iu8vd91h';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
+
+</body>
+
+</html>

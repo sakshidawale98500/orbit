@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Last 15 Days Profit Overview</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 30px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .chart-container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .total {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #e0e0e0;
+    }
+
+    .data-table {
+      max-width: 700px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>📊 Last 15 Days Profit Overview</h2>
+
+  <div class="chart-container">
+    <canvas id="pieChart"></canvas>
+  </div>
+
+  <div class="total" id="totalProfit">Total Profit: ₹0</div>
+
+  <div class="data-table">
+    <h3 style="text-align:center;">📅 Past 15 Days Profit Data</h3>
+    <table id="profitTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Profit (₹)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Filled by JavaScript -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    let profitChart = null;
+    const profitAPI = 'http://localhost:1337/api/profits?sort[0]=date:desc&pagination[limit]=15';
+
+    async function fetchProfitData() {
+      const response = await fetch(profitAPI);
+      const rawData = await response.json();
+
+      if (!rawData || !Array.isArray(rawData.data)) {
+        throw new Error("Invalid data from API");
+      }
+
+      return rawData.data.map(entry => ({
+        date: new Date(entry.attributes.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }),
+        profit: entry.attributes.profit
+      })).reverse();
+    }
+
+    function generateColors(count) {
+      const colors = [];
+      for (let i = 0; i < count; i++) {
+        const hue = Math.floor((360 / count) * i);
+        colors.push(`hsl(${hue}, 70%, 60%)`);
+      }
+      return colors;
+    }
+
+    function updateProfitTable(data) {
+      const tableBody = document.getElementById("profitTable").querySelector("tbody");
+      tableBody.innerHTML = "";
+      data.forEach(item => {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${item.date}</td><td>₹${item.profit}</td>`;
+        tableBody.appendChild(row);
+      });
+    }
+
+    function updateTotalProfit(data) {
+      const total = data.reduce((acc, item) => acc + item.profit, 0);
+      document.getElementById("totalProfit").innerText = `Total Profit: ₹${total.toLocaleString()}`;
+    }
+
+    async function renderProfitChart() {
+      try {
+        const data = await fetchProfitData();
+
+        const labels = data.map(item => item.date);
+        const values = data.map(item => item.profit);
+
+        const ctx = document.getElementById('pieChart').getContext('2d');
+
+        if (profitChart) {
+          profitChart.destroy();
+        }
+
+        profitChart = new Chart(ctx, {
+          type: 'pie',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: values,
+              backgroundColor: generateColors(values.length)
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom' },
+              tooltip: {
+                callbacks: {
+                  label: context => `${context.label}: ₹${context.parsed.toLocaleString()}`
+                }
+              }
+            }
+          }
+        });
+
+        updateProfitTable(data);
+        updateTotalProfit(data);
+
+      } catch (error) {
+        console.error("Profit Chart Error:", error);
+        alert("Failed to load profit chart.");
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', renderProfitChart);
+  </script>
+
+</body>
+</html>

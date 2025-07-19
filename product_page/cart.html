@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cart | Avanya Desi</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="navbar">
+    <h1><a href="index.html">Avanya Desi</a></h1>
+    <a href="product-page.html" class="cart-link">🛍 Back to Products</a>
+  </header>
+
+  <section class="product-section">
+    <h2>Your Cart</h2>
+    <div id="cart-container" class="product-container"></div>
+    <h3 id="cart-total">Total: ₹0</h3>
+    <button id="clear-cart-btn">Clear Cart</button>
+    <button type="button" onclick="placeOrder()">Place Order</button>
+  </section>
+
+  <script src="./cart.js"></script>
+</body>
+</html>
