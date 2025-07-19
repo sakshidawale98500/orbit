@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Audit Logs - Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f1f5f9;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #0f7b1c;
+      margin-bottom: 20px;
+    }
+
+    .filter-bar {
+      max-width: 800px;
+      margin: 0 auto 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    select, input {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    table {
+      width: 100%;
+      max-width: 1000px;
+      margin: auto;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    th {
+      background-color: #0f7b1c;
+      color: #fff;
+    }
+
+    tr:hover {
+      background-color: #f0fdf4;
+    }
+
+    .no-data {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 16px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🧾 Product Audit Logs</h2>
+
+  <div class="filter-bar">
+    <select id="actionFilter">
+      <option value="">All Actions</option>
+      <option value="create">Create</option>
+      <option value="update">Update</option>
+      <option value="delete">Delete</option>
+    </select>
+    <input type="number" id="entityIdFilter" placeholder="Search by Product ID" />
+  </div>
+
+  <table id="logTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Action</th>
+        <th>Entity</th>
+        <th>Entity ID</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Filled by JavaScript -->
+    </tbody>
+  </table>
+
+  <div class="no-data" id="noData" style="display:none;">No logs found.</div>
+
+  <script>
+    async function fetchAuditLogs() {
+  try {
+    const res = await fetch("http://localhost:1337/api/audit-logs?sort[0]=createdAt:desc");
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    
+    const result = await res.json();
+
+    if (!result.data || !Array.isArray(result.data)) {
+      console.warn("Unexpected response format:", result);
+      return [];
+    }
+
+    return result.data;
+
+  } catch (error) {
+    console.error("❌ Failed to fetch audit logs:", error.message);
+    return [];
+  }
+}
+
+    function renderLogs(logs) {
+      const tbody = document.querySelector("#logTable tbody");
+      const noData = document.getElementById("noData");
+      tbody.innerHTML = "";
+
+      if (logs.length === 0) {
+        noData.style.display = "block";
+        return;
+      }
+
+      noData.style.display = "none";
+      logs.forEach(log => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${log.date}</td>
+          <td>${log.action}</td>
+          <td>${log.entity}</td>
+          <td>${log.entityId}</td>
+          <td>${log.description}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function loadAndFilterLogs() {
+      const allLogs = await fetchAuditLogs();
+      const action = document.getElementById("actionFilter").value;
+      const entityId = document.getElementById("entityIdFilter").value;
+
+      const filtered = allLogs.filter(log =>
+        (!action || log.action === action) &&
+        (!entityId || String(log.entityId) === entityId)
+      );
+
+      renderLogs(filtered);
+    }
+
+    document.getElementById("actionFilter").addEventListener("change", loadAndFilterLogs);
+    document.getElementById("entityIdFilter").addEventListener("input", loadAndFilterLogs);
+
+    window.addEventListener("DOMContentLoaded", loadAndFilterLogs);
+  </script>
+</body>
+</html>

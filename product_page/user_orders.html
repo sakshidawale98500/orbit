@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Orders - Avanya Desi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #e0f9e2;
+    }
+
+    header.navbar {
+  background-color: #649f6b;
+  padding: 2px 15px; /* reduced height */
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+header.navbar h1 a {
+  color: #d8fadd;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+header.navbar h2 {
+  margin: 0;
+  font-size: 1.0rem; /* smaller heading */
+}
+
+    .product-section {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 10px;
+    }
+
+    .order-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      transition: transform 0.2s ease;
+    }
+
+    .order-card:hover {
+      transform: scale(1.01);
+    }
+
+    .order-card h3 {
+      margin: 0 0 10px;
+      color: #0f7b1c;
+    }
+
+    .order-card p {
+      margin: 6px 0;
+      color: #333;
+      font-size: 15px;
+    }
+
+    .order-products {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      gap: 15px;
+    }
+
+    .product-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 10px;
+      width: 120px;
+      background-color: #fafafa;
+      text-align: center;
+    }
+
+    .product-item img {
+      width: 100%;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .product-item strong {
+      font-size: 14px;
+      color: #444;
+    }
+
+    @media (max-width: 600px) {
+      header.navbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .product-section {
+        margin: 15px;
+        padding: 10px;
+      }
+
+      .order-card {
+        padding: 15px;
+      }
+
+      .product-item {
+        width: 100px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="navbar">
+    <h1><a href="product-page.html">← Back to Home</a></h1>
+    <h2>🧾 Your Orders</h2>
+  </header>
+
+  <section class="product-section">
+    <div id="user-order-container" class="product-container">
+      <!-- Orders will be loaded here -->
+    </div>
+  </section>
+
+  <script>
+    async function getUserOrders() {
+      const token = localStorage.getItem("jwt");
+      if (!token) {
+        alert("🔒 Please log in to view your orders.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      try {
+        const userRes = await fetch("http://localhost:1337/api/users/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const user = await userRes.json();
+        const userId = user.id;
+
+        const orderRes = await fetch("http://localhost:1337/api/orders?populate[product][populate]=Product_image", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const orderData = await orderRes.json();
+        const orders = orderData.data || [];
+        const userOrders = orders.filter(order => order.user_id === String(userId));
+        const container = document.getElementById("user-order-container");
+
+        container.innerHTML = "";
+
+        if (userOrders.length === 0) {
+          container.innerHTML = "<p>No orders found.</p>";
+          return;
+        }
+
+        userOrders.forEach(order => {
+          const div = document.createElement("div");
+          div.classList.add("order-card");
+
+          const productHTML = (order.product || []).map(p => {
+            const imgUrl = p.Product_image?.url
+              ? `http://localhost:1337${p.Product_image.url}`
+              : 'https://via.placeholder.com/100x80?text=No+Image';
+
+            return `
+              <div class="product-item">
+                <img src="${imgUrl}" alt="${p.Product_name}" />
+                <strong>${p.Product_name}</strong>
+                <span>₹${p.Price}</span>
+              </div>
+            `;
+          }).join("");
+
+          div.innerHTML = `
+            <h3>🧾 Order ID: ${order.id}</h3>
+            <p><strong>Status:</strong> ${order.Order_Status}</p>
+            <p><strong>Total:</strong> ₹${order.Amount}</p>
+            <p><strong>Payment:</strong> ${order.Pyment_info}</p>
+            <p><strong>Date:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
+            <h4>Products:</h4>
+            <div class="order-products">${productHTML}</div>
+          `;
+
+          container.appendChild(div);
+        });
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+        alert("❌ Failed to load orders.");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", getUserOrders);
+  </script>
+</body>
+</html>

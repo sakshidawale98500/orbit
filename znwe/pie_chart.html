@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weekly User Registrations</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+  --primary: #2a4727;
+  --primary-light: #3a5a36;
+  --accent: #6fbf73;
+  --accent-light: #8fd694;
+  --bg: #f4f8f9;
+  --bg-dark: #e1e8eb;
+  --white: #ffffff;
+  --card-shadow: rgba(0, 0, 0, 0.08);
+  --text-dark: #2d3748;
+  --text-light: #718096;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg);
+  color: var(--text-dark);
+  line-height: 1.6;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+h1 {
+  text-align: center;
+  margin: 20px 0 30px;
+  color: var(--primary);
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+h1::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--primary));
+  border-radius: 2px;
+}
+
+.chart-container {
+  max-width: 900px;
+  margin: 30px auto;
+  background-color: var(--white);
+  padding: 30px;
+  border-radius: 14px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--accent), var(--primary));
+}
+
+.chart-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+#loader {
+  text-align: center;
+  font-size: 18px;
+  padding: 40px;
+  color: var(--primary);
+  animation: fadeIn 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0.5; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.footer-note {
+  text-align: center;
+  margin-top: 40px;
+  font-size: 14px;
+  color: var(--text-light);
+  padding: 15px;
+  background-color: var(--white);
+  border-radius: 8px;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+}
+
+/* Stats Summary Cards */
+.stats-container {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
+  max-width: 900px;
+  margin: 0 auto 30px;
+}
+
+.stat-card {
+  flex: 1;
+  min-width: 200px;
+  background: var(--white);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  transition: all 0.3s ease;
+  border-left: 4px solid var(--accent);
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card h3 {
+  color: var(--text-light);
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.stat-card p {
+  color: var(--primary);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.8rem;
+  }
+  
+  .stats-container {
+    flex-direction: column;
+  }
+  
+  .stat-card {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .chart-container {
+    padding: 20px 15px;
+  }
+  
+  body {
+    padding: 15px;
+  }
+}
+
+/* Animation for chart loading */
+@keyframes chartLoad {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.chart-container.show {
+  animation: chartLoad 0.6s ease-out forwards;
+}
+
+/* Tooltip styling */
+.chartjs-tooltip {
+  background: rgba(42, 71, 39, 0.9) !important;
+  border-radius: 6px !important;
+  padding: 10px 15px !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2) !important;
+  border: none !important;
+}
+
+.chartjs-tooltip-key {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+    :root {
+      --primary: #2a4727;
+      --accent: #6fbf73;
+      --bg: #f4f8f9;
+      --white: #ffffff;
+      --card-shadow: rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      color: #333;
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--primary);
+      font-size: 30px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .chart-container {
+      max-width: 1500px;
+      margin: 20px auto;
+      background-color: var(--white);
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px var(--card-shadow);
+      transition: all 0.3s ease;
+    }
+
+    .chart-container:hover {
+      transform: translateY(-4px);
+    }
+
+    canvas {
+      max-width: 100%;
+      height: auto;
+    }
+
+    #loader {
+      text-align: center;
+      font-size: 18px;
+      padding: 40px;
+      color: var(--primary);
+      animation: fadeIn 1s ease-in-out infinite alternate;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0.5; }
+      to   { opacity: 1; }
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 22px;
+      }
+
+      .chart-container {
+        padding: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📊 Weekly User Registrations</h1>
+  <div id="loader">Loading chart...</div>
+
+  <div class="chart-container" style="display: none;">
+    <canvas id="weeklyUserChart"></canvas>
+  </div>
+
+
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const loader = document.getElementById("loader");
+      const chartContainer = document.querySelector(".chart-container");
+      loader.style.display = "block";
+
+      try {
+        const res = await fetch("http://localhost:1337/api/users", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+          }
+        });
+
+        const users = await res.json();
+
+        const labels = [];
+        const data = [];
+
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(date.getDate() - i);
+          labels.push(date.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric' }));
+          data.push(0);
+        }
+
+        users.forEach(user => {
+          const createdAt = new Date(user.createdAt).toISOString().split("T")[0];
+          for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const matchDate = date.toISOString().split("T")[0];
+            if (createdAt === matchDate) {
+              data[6 - i]++;
+            }
+          }
+        });
+
+        loader.style.display = "none";
+        chartContainer.style.display = "block";
+
+        const ctx = document.getElementById("weeklyUserChart").getContext("2d");
+
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, "#6fbf73");
+        gradient.addColorStop(1, "#a8d5ba");
+
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [{
+              label: "New Users",
+              data: data,
+              backgroundColor: gradient,
+              borderRadius: 6,
+              hoverBackgroundColor: "#2a4727"
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              title: {
+                display: true,
+                text: "Users Registered (Last 7 Days)",
+                font: { size: 18 }
+              },
+              tooltip: {
+                enabled: true,
+                callbacks: {
+                  label: ctx => ` ${ctx.raw} new user(s)`
+                }
+              },
+              legend: {
+                display: false
+              }
+            },
+            scales: {
+              x: {
+                grid: {
+                  display: false
+                }
+              },
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  precision: 0
+                }
+              }
+            }
+          }
+        });
+
+      } catch (err) {
+        loader.textContent = "⚠️ Failed to load data.";
+        console.error("Chart load error:", err);
+      }
+    });
+  </script>
+
+</body>3
+</html>

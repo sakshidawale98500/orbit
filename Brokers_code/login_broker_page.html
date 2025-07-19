@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Broker Login</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #e8f5e9; /* Light green background */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      background: #ffffff;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 5px 25px rgba(76, 175, 80, 0.15);
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid #c8e6c9;
+    }
+
+    .login-container h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #2e7d32; /* Darker green */
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #388e3c; /* Medium green */
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #a5d6a7;
+      border-radius: 8px;
+      font-size: 14px;
+      background: #f1f8e9;
+    }
+
+    input[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      background: #4caf50; /* Main green */
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    input[type="submit"]:hover {
+      background: #388e3c; /* Darker green on hover */
+    }
+
+    .error {
+      color: red;
+      font-size: 13px;
+      margin-top: -15px;
+      margin-bottom: 15px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <h2>Broker Login</h2>
+    <form id="brokerLoginForm">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" required />
+        <div id="emailError" class="error">Please enter a valid email.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" required />
+        <div id="passwordError" class="error">Password must be at least 6 characters.</div>
+      </div>
+
+      <input type="submit" value="Login" />
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('brokerLoginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const emailError = document.getElementById('emailError');
+    const passwordError = document.getElementById('passwordError');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      let valid = true;
+
+      if (!emailInput.value.includes('@')) {
+        emailError.style.display = 'block';
+        valid = false;
+      } else {
+        emailError.style.display = 'none';
+      }
+
+      if (passwordInput.value.length < 6) {
+        passwordError.style.display = 'block';
+        valid = false;
+      } else {
+        passwordError.style.display = 'none';
+      }
+
+      if (valid) {
+        const brokerData = {
+          email: emailInput.value,
+          password: passwordInput.value,
+        };
+
+        // Connect to your API
+        fetch('http://localhost:1337/api/broker-login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(brokerData)
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.token) {
+            alert('Login successful');
+            localStorage.setItem('brokerToken', data.token);
+            window.location.href = '/broker-dashboard.html';
+          } else {
+            alert('Invalid login credentials');
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Server error. Please try again.');
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Avanya Desi - Home</title>
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #CEEEC2;
+    }
+
+    /* Navbar Styles */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: #CEEEC2;
+      position: sticky;
+      top: 0;
+      z-index: 700;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .navbar img {
+      height: 70px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 10px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #3a5e34;
+      font-weight: 900;
+    }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .cart-icon {
+      font-size: 18px;
+      background-color: white;
+      color: #3a5e34;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .cta-button {
+      background-color: #3a5e34;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 400px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    /* Form Styles */
+    .form-container h2 {
+      text-align: center;
+      color: #15803d;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-container label {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .form-container input {
+      width: 100%;
+      padding: 0.5rem 1rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .form-container input:focus {
+      border-color: #22c55e;
+    }
+
+    .form-container button {
+      width: 100%;
+      background-color: #16a34a;
+      color: white;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-bottom: 0.75rem;
+    }
+
+    .form-container button:hover {
+      background-color: #15803d;
+    }
+
+    .admin-btn {
+      background-color: #2563eb;
+    }
+
+    .admin-btn:hover {
+      background-color: #1e40af;
+    }
+
+    .text-sm {
+      text-align: center;
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-top: 1rem;
+    }
+
+    .text-sm a {
+      color: #16a34a;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .text-sm a:hover {
+      text-decoration: underline;
+    }
+
+    /* Hero/Slider */
+    .hero {
+      height: 110vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .background-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1;
+    }
+
+    .hero-text {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-text h1 {
+      font-size: 48px;
+      margin: 0;
+    }
+
+    .hero-text p {
+      font-size: 20px;
+      margin-top: 10px;
+    }
+
+    /* Scroll Down Arrow */
+    .scroll-down {
+      position: absolute;
+      bottom: 1px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 30px;
+      color: black;
+      z-index: 2;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      100% {
+        transform: translate(-50%, 0);
+      }
+
+      50% {
+        transform: translate(-50%, 10px);
+      }
+    }
+
+    /* Section Styles */
+    .section {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .section h2 {
+      font-size: 32px;
+      color: darkgreen;
+      font-style: italic;
+    }
+
+    .section h2 span {
+      color: darkgreen;
+      font-style: italic;
+    }
+
+    .description {
+      max-width: 800px;
+      margin: 10px auto 40px;
+      color: #555;
+    }
+
+    .image-row,
+    .card-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 50px;
+      margin-bottom: 40px;
+    }
+
+    .image-row img {
+      width: 500px;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .image-row p {
+      margin-top: 8px;
+      font-weight: bold;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      background-color: black;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .highlight-card {
+      background: #eafae3;
+      width: 260px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: left;
+    }
+
+    .highlight-card h4 {
+      color: black;
+      margin-top: 15px;
+    }
+
+    .highlight-card p {
+      color: black;
+      font-size: 14px;
+    }
+
+    .icon-circle {
+      width: 50px;
+      height: 60px;
+      border-radius: 75%;
+      background-color: black;
+      color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+    }
+
+    .highlight-card img {
+      width: 100%;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <img
+      src="https://static.vecteezy.com/system/resources/previews/002/136/049/original/leaf-logo-organic-label-eco-icon-isolated-background-free-vector.jpg"
+      alt="Avanya Desi Logo">
+    <div class="nav-links">
+      <h1><i><a href="#">𝔸𝕧𝕒𝕟𝕪𝕒 𝔻𝕖𝕤𝕚</a></i></h1>
+    </div>
+    <div class="navbar-right">
+      <!-- <a href="common_user.html" class="cart-icon" title="Order Now">🛒</a> -->
+      <a id="signupBtn" class="cta-button">SignUp</a>
+    </div>
+  </div>
+
+  <!-- Signup Modal -->
+  <div id="signupModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal()">&times;</span>
+
+      <!-- Signup Form -->
+      <div class="form-container" id="signupForm">
+        <h2>Create Your Account</h2>
+        <form id="signupFormElement">
+          <label>Full Name</label>
+          <input type="text" id="signup_name" required />
+
+          <label>Email</label>
+          <input type="email" id="signup_email" required />
+
+          <label>Password</label>
+          <input type="password" id="signup_password" required />
+
+          <button type="submit">Sign Up</button>
+          <button type="button" class="admin-btn" onclick="showAdminLogin()">Admin Login</button>
+           <button type="button" class="admin-btn" onclick="showBrokerSignup()">Broker Signup</button>
+
+        </form>
+        <p class="text-sm">
+          Already have an account?
+          <a onclick="showUserLogin()">Log In</a>
+        </p>
+      </div>
+
+      <!-- User Login Form -->
+      <div class="form-container" id="loginForm" style="display:none;">
+        <h2>User Login</h2>
+        <form id="loginFormElement">
+          <label>Username or Email</label>
+          <input type="text" id="login_username" required />
+
+          <label>Password</label>
+          <input type="password" id="login_password" required />
+
+          <button type="submit">Log In</button>
+        </form>
+        <p class="text-sm">
+          Don't have an account?
+          <a onclick="showSignup()">Sign Up</a>
+        </p>
+      </div>
+
+
+      <!-- Admin Login Form -->
+      <div class="form-container" id="adminForm" style="display:none;">
+        <h2>Admin Login</h2>
+        <form id="adminFormElement">
+          <label>Admin Username</label>
+          <input type="text" id="admin_username" required />
+
+          <label>Password</label>
+          <input type="password" id="admin_password" required />
+
+          <button type="submit">Admin Log In</button>
+        </form>
+        <p class="text-sm">
+          Return to <a onclick="showSignup()">Signup</a>
+        </p>
+      </div>
+      <!-- Broker Signup Form -->
+<div class="form-container" id="brokerSignupForm" style="display:none;">
+  <h2>Broker Signup</h2>
+  <form id="brokerSignupFormElement">
+    <label>Full Name</label>
+    <input type="text" id="broker_name" required />
+
+    <label>Email</label>
+    <input type="email" id="broker_email" required />
+
+    <label>Password</label>
+    <input type="password" id="broker_password" required />
+
+    <button type="submit">Register as Broker</button>
+  </form>
+  <p class="text-sm">Already registered? <a onclick="showBrokerLogin()">Broker Login</a></p>
+</div>
+<!-- Broker Login Form -->
+<div class="form-container" id="brokerLoginForm" style="display:none;">
+  <h2>Broker Login</h2>
+  <form id="brokerLoginFormElement">
+    <label>Email or Username</label>
+    <input type="text" id="broker_login_username" required />
+
+    <label>Password</label>
+    <input type="password" id="broker_login_password" required />
+
+    <button type="submit">Login as Broker</button>
+  </form>
+  <p class="text-sm">Not a Broker? <a onclick="showSignup()">Go Back</a></p>
+</div>
+
+
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <div class="hero">
+    <video autoplay muted loop playsinline class="background-video">
+      <source src="https://videos.pexels.com/video-files/5865851/5865851-uhd_2560_1440_25fps.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <div class="hero-text">
+      <i>
+        <h1>Building Sustainable Agriculture</h1>
+        <p>Paving the way for eco-friendly practices that secure our future.</p>
+      </i>
+    </div>
+    <div class="scroll-down">↓<h6>
+        <p>scroll-down
+        <p>
+      </h6>
+    </div>
+  </div>
+
+  <!-- What Makes Us Different -->
+  <div class="section">
+    <h2>What makes us <span>Different</span> ?</h2>
+    <h4>
+      <p class="description">
+        Buy high-quality farm-fresh organic vegetables, fruits, and groceries online and get organic delivery at your
+        door step at affordable prices. We promote all-natural, bio products from all corners in India. Helping organic
+        producers to market organic products and sell directly to end users. A daily habit you'll never want to break.
+      </p>
+    </h4>
+
+    <div class="image-row">
+      <div>
+        <img
+          src="https://c4.wallpaperflare.com/wallpaper/53/520/935/food-vegetables-tomatoes-eggplant-wallpaper-preview.jpg"
+          alt="Vegetables" />
+        <p>Vegetables</p>
+      </div>
+      <div>
+        <img src="https://wallpapercave.com/wp/wp6557500.jpg" alt="Fruits" />
+        <p>Fruits</p>
+      </div>
+      <div>
+        <img
+          src="https://static.vecteezy.com/system/resources/thumbnails/028/250/888/small_2x/various-dried-fruits-and-nuts-on-a-kitchen-table-copy-space-generative-ai-photo.jpg"
+          alt="Groceries" />
+        <p>Groceries</p>
+      </div>
+    </div>
+    <a class="btn" href="#">Know More About Us</a>
+  </div>
+
+  <!-- Services Highlight -->
+  <div class="section">
+    <h2>Services <span>Highlight</span></h2>
+    <div class="card-row">
+      <div class="highlight-card">
+        <div class="icon-circle">🌱</div>
+        <h4>Soil Revitalization</h4>
+        <p>Enhancing soil health through natural bio-products that boost fertility and reduce dependency on synthetic
+          agricultural resources.</p>
+      </div>
+
+      <div class="highlight-card">
+        <div class="icon-circle">🔧</div>
+        <h4>Bio Inputs Supply</h4>
+        <p>Providing natural, eco-friendly input like compost, organic pesticides and fertilizers as an alternative to
+          synthetic chemicals.</p>
+      </div>
+
+      <div class="highlight-card">
+        <div class="icon-circle">🤝</div>
+        <h4>Farmer Empowerment</h4>
+        <p>Equipping farmers with the information, tools and resources to lead production and marketing through
+          community-driven growth.</p>
+      </div>
+
+      <div class="highlight-card">
+        <div class="icon-circle">🛒</div>
+        <h4>Market Access</h4>
+        <p>Seamless pathways for farmers and producers to market and sell their products directly to conscious
+          consumers.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Highlights -->
+  <div class="section" style="background-color: #CEEEC2;">
+    <h2>Products <span>Highlight</span></h2>
+    <div class="card-row">
+      <div class="highlight-card">
+        <img
+          src="https://img.freepik.com/premium-photo/nanoencapsulated-organic-biofertilizers-background_1257317-18610.jpg"
+          alt="Bio Manures" />
+        <h4>Bio Manures</h4>
+        <p>Augment soil health through bio-based fertility solutions. Securing safe and sustainable agricultural
+          practices.</p>
+      </div>
+
+      <div class="highlight-card">
+        <img src="https://th.bing.com/th/id/OIP.Ixi1o7F5CKRdZ4RLEAQ-QAHaJo?cb=iwc2&pid=ImgDet&w=197&h=256&c=7&dpr=1.4"
+          alt="Bio Pesticides" />
+        <h4>Bio Pesticides</h4>
+        <p>Providing natural, eco-friendly pest repellents, ensuring zero chemical residue and zero synthetic
+          disturbance.</p>
+      </div>
+
+      <div class="highlight-card">
+        <img src="https://th.bing.com/th/id/OIP.A-jvlNQ7CS5U0cgshXC9gAHaE9?cb=iwc2&w=700&h=469&rs=1&pid=ImgDetMain"
+          alt="Heirloom Seeds" />
+        <h4>Heirloom Seeds</h4>
+        <p>Heirloom seeds are traditional, open-pollinated seeds that have been preserved and passed down through
+          generations, often for more than 50 years. Unlike hybrid or genetically modified seeds, heirloom varieties are
+          naturally pollinated and genetically stable, meaning they produce plants true to their parent traits.</p>
+      </div>
+
+      <div class="highlight-card">
+        <img src="https://th.bing.com/th/id/OIP.N0A9J5teQDlBCJ2kJtVxIgHaEK?w=246&h=180&c=7&r=0&o=5&cb=iwc2&pid=1.7"
+          alt="Miracle Crops" />
+        <h4>Miracle Crops</h4>
+        <p>Miracle crops refer to specially selected or naturally resilient crops that are capable of thriving in
+          challenging conditions such as drought-prone, nutrient-poor, or degraded soils. These crops are often
+          high-yielding, require minimal chemical inputs, and are adapted to withstand extreme weather, pests, and
+          diseases.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Modal Control Functions (move outside DOMContentLoaded)
+    function showSignup() {
+      document.getElementById("signupForm").style.display = "block";
+      document.getElementById("loginForm").style.display = "none";
+      document.getElementById("adminForm").style.display = "none";
+    }
+
+    function showUserLogin() {
+      document.getElementById("signupForm").style.display = "none";
+      document.getElementById("loginForm").style.display = "block";
+      document.getElementById("adminForm").style.display = "none";
+    }
+
+    function showAdminLogin() {
+      document.getElementById("signupForm").style.display = "none";
+      document.getElementById("loginForm").style.display = "none";
+      document.getElementById("adminForm").style.display = "block";
+    }
+
+    function closeModal() {
+      document.getElementById("signupModal").style.display = "none";
+    }
+ function showBrokerSignup() {
+    document.getElementById("signupForm").style.display = "none";
+    document.getElementById("loginForm").style.display = "none";
+    document.getElementById("adminForm").style.display = "none";
+    document.getElementById("brokerSignupForm").style.display = "block";
+    document.getElementById("brokerLoginForm").style.display = "none";
+  }
+
+  function showBrokerLogin() {
+    document.getElementById("signupForm").style.display = "none";
+    document.getElementById("loginForm").style.display = "none";
+    document.getElementById("adminForm").style.display = "none";
+    document.getElementById("brokerSignupForm").style.display = "none";
+    document.getElementById("brokerLoginForm").style.display = "block";
+  }
+    // Main script
+    document.addEventListener("DOMContentLoaded", () => {
+      const modal = document.getElementById("signupModal");
+      const signupBtn = document.getElementById("signupBtn");
+
+      signupBtn?.addEventListener("click", function () {
+        modal.style.display = "flex";
+        showSignup();
+      });
+
+      window.addEventListener("click", function (event) {
+        if (event.target === modal) {
+          closeModal();
+        }
+      });
+
+      // Signup Form Submit
+      document.getElementById("signupFormElement")?.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const name = document.getElementById("signup_name").value;
+        const email = document.getElementById("signup_email").value;
+        const password = document.getElementById("signup_password").value;
+
+        try {
+          const response = await fetch("http://localhost:1337/api/auth/local/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              username: name,
+              email: email,
+              password: password,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            alert("Signup successful! Please log in.");
+            showUserLogin();
+          } else {
+            alert("Signup failed: " + (data?.error?.message || "Unknown error"));
+          }
+        } catch (error) {
+          alert("Network error: " + error.message);
+        }
+      });
+
+      // User Login
+      document.getElementById("loginFormElement")?.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const username = document.getElementById("login_username").value;
+        const password = document.getElementById("login_password").value;
+
+        try {
+          const response = await fetch("http://localhost:1337/api/auth/local", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              identifier: username,
+              password: password,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            localStorage.setItem("jwt", data.jwt);
+            alert("Login successful!");
+            window.location.href = "../product_page/product-page.html"; // ✅ Redirect
+          } else {
+            alert("Login failed: " + (data?.error?.message || "Unknown error"));
+          }
+        } catch (error) {
+          alert("Network error: " + error.message);
+          console.error("User login error:", error);
+        }
+      });
+
+      // Admin Login
+      document.getElementById("adminFormElement")?.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const username = document.getElementById("admin_username").value;
+        const password = document.getElementById("admin_password").value;
+
+        let meResponse = null;
+
+        try {
+          const loginResponse = await fetch("http://localhost:1337/api/auth/local", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              identifier: username,
+              password: password,
+            }),
+          });
+
+          const loginData = await loginResponse.json();
+
+          if (!loginResponse.ok) {
+            alert("Login failed: " + (loginData?.error?.message || "Unknown error"));
+            return;
+          }
+
+          const token = loginData.jwt;
+
+          meResponse = await fetch("http://localhost:1337/api/users/me?populate=role", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          const meData = await meResponse.json();
+
+          const userRole = meData?.role?.name?.toLowerCase();
+
+          if (userRole === "admin") {
+            localStorage.setItem("jwt", token);
+            alert("Admin login successful!");
+            window.location.href = "../admin/admin.html";
+          } else {
+            alert("Access denied: You are not an admin.");
+          }
+        } catch (error) {
+          alert("Network error: " + error.message);
+          console.error("Admin login error:", error);
+          console.log("meResponse at time of error:", meResponse);
+        }
+      });
+
+    });
+    
+    // Broker Login
+document.getElementById("brokerLoginFormElement")?.addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const username = document.getElementById("broker_login_username").value;
+  const password = document.getElementById("broker_login_password").value;
+
+  let meResponse = null;
+
+  try {
+    const loginResponse = await fetch("http://localhost:1337/api/auth/local", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        identifier: username,
+        password: password,
+      }),
+    });
+
+    const loginData = await loginResponse.json();
+
+    if (!loginResponse.ok) {
+      alert("Login failed: " + (loginData?.error?.message || "Unknown error"));
+      return;
+    }
+
+    const token = loginData.jwt;
+
+    // Fetch user role info
+    meResponse = await fetch("http://localhost:1337/api/users/me?populate=role", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const meData = await meResponse.json();
+    console.log(meData.role)
+
+    const userRole = meData?.role?.name?.toLowerCase();
+    console.log(userRole)
+
+    if (userRole === "broker") {
+      localStorage.setItem("jwt", token);
+      alert("Broker login successful!");
+      window.location.href = "../Brokers_code/productpage.html";
+
+ // ✅ Update this to your actual broker dashboard path
+    } else {
+      alert("Access denied: You are not a broker.");
+    }
+  } catch (error) {
+    alert("Network error: " + error.message);
+    console.error("Broker login error:", error);
+    console.log("meResponse at time of error:", meResponse);
+  }
+});
+
+  </script>
+
+</body>
+
+</html>
