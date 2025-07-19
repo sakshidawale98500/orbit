@@ -151,7 +151,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const userId = await getCurrentUserId();  
+    const userId = await getCurrentUserId();
 
     if (!userId) {
       alert("🔒 You need to log in to place an order.");
@@ -172,6 +172,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const amount = cart.reduce((total, item) => total + item.price * item.quantity, 0);
     const productIds = cart.map(item => item.id);
+    const product_detail = cart.map(item => ({
+      product: item.id,
+      Quantity: String(item.quantity) // ✅ lowercase 'quantity'
+    }));
+
 
     const orderData = {
       data: {
@@ -182,8 +187,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         Pyment_info: payment_info,
         Amount: amount,
         Order_Status: "Pending",
-        product: productIds, 
-        user_id: String(userId)
+        product_detail, // 👈 this matches your component name exactly
+        user_id: String(userId),
       },
     };
 
@@ -214,49 +219,49 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (error) {
       console.error("❌ Error placing order:", error);
       alert("❌ An unexpected error occurred.");
-      
+
     }
   }
 
 
   // Get User Orders
   async function getUserOrders() {
-  const token = localStorage.getItem("jwt");
-  if (!token) {
-    alert("🔒 Please log in to view your orders.");
-    return;
-  }
-
-  // Get current user ID
-  const userId = await getCurrentUserId();
-  if (!userId) {
-    alert("❌ Failed to fetch user info.");
-    return;
-  }
-
-  try {
-    const res = await fetch("http://localhost:1337/api/orders", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const data = await res.json();
-    const allOrders = data?.data || [];
-
-    // Filter orders by user_id (as text match)
-    const userOrders = allOrders.filter(order => order.user_id == userId);
-
-    if (userOrders.length === 0) {
-      alert("📭 You have no orders yet.");
+    const token = localStorage.getItem("jwt");
+    if (!token) {
+      alert("🔒 Please log in to view your orders.");
       return;
     }
 
-    console.log("🧾 Your Orders:", userOrders);
+    // Get current user ID
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      alert("❌ Failed to fetch user info.");
+      return;
+    }
 
-    // 👉 Render somewhere (update as per your HTML)
-    const userOrderContainer = document.getElementById("user-order-container");
-    userOrderContainer.innerHTML = userOrders.map(order => `
+    try {
+      const res = await fetch("http://localhost:1337/api/orders", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+      const allOrders = data?.data || [];
+
+      // Filter orders by user_id (as text match)
+      const userOrders = allOrders.filter(order => order.user_id == userId);
+
+      if (userOrders.length === 0) {
+        alert("📭 You have no orders yet.");
+        return;
+      }
+
+      console.log("🧾 Your Orders:", userOrders);
+
+      // 👉 Render somewhere (update as per your HTML)
+      const userOrderContainer = document.getElementById("user-order-container");
+      userOrderContainer.innerHTML = userOrders.map(order => `
       <div class="order-card">
         <h4>Order ID: ${order.id}</h4>
         <p><strong>Status:</strong> ${order.Order_Status}</p>
@@ -266,11 +271,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       </div>
     `).join("");
 
-  } catch (err) {
-    console.error("❌ Error fetching user orders:", err);
-    alert("❌ Could not fetch orders.");
+    } catch (err) {
+      console.error("❌ Error fetching user orders:", err);
+      alert("❌ Could not fetch orders.");
+    }
   }
-}
 
 
   async function getCurrentUserId() {

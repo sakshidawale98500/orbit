@@ -309,34 +309,37 @@ document.addEventListener("DOMContentLoaded", () => {
     // Orders code
     // Render orders
     function renderOrders(orders) {
-        const orderContainer = document.getElementById("admin-orders-container");
-        orderContainer.innerHTML = "";
+    const orderContainer = document.getElementById("admin-orders-container");
+    orderContainer.innerHTML = "";
 
-        for (const order of orders) {
-            const products = order.product || [];
+    for (const order of orders) {
+        const productDetailsArr = order.product_detail || [];
 
-            let productDetails = "No products";
-            if (products.length > 0) {
-                productDetails = products.map(p => `
-                <div class="product-item" style="margin-bottom:10px; padding:5px; border:1px solid #ddd;">
-                    <p><strong>Name:</strong> ${p.Product_name}</p>
-                    <p><strong>Price:</strong> ₹${p.Price}</p>
-                    <p><strong>Description:</strong> ${p.Discription}</p>
-                    <p><strong>Weight:</strong> ${p.Product_weight} ${p.weight}</p>
-                    <p><em>Created At:</em> ${new Date(p.createdAt).toLocaleString()}</p>
-                </div>
-            `).join("");
-            }
+        let productDetails = "No products";
+        if (Array.isArray(productDetailsArr) && productDetailsArr.length > 0) {
+            productDetails = productDetailsArr.map(p => {
+                const product = p.product || {};
+                return `
+                    <div class="product-item" style="margin-bottom:10px; padding:5px; border:1px solid #ddd;">
+                        <p><strong>Name:</strong> ${product.Product_name || "N/A"}</p>
+                        <p><strong>Price:</strong> ₹${product.Price || "N/A"}</p>
+                        <p><strong>Description:</strong> ${product.Discription || "N/A"}</p>
+                        <p><strong>Weight:</strong> ${product.Product_weight || ""} ${product.weight || ""}</p>
+                        <p><strong>Quantity:</strong> ${p.Quantity || "1"}</p>
+                    </div>
+                `;
+            }).join("");
+        }
 
-            const userName = userIdToName[order.user_id] || "Unknown User";
+        const userName = userIdToName[order.user_id] || "Unknown User";
 
-            const card = document.createElement("div");
-            card.classList.add("order-card");
-            card.style.border = "1px solid #ccc";
-            card.style.padding = "15px";
-            card.style.marginBottom = "20px";
+        const card = document.createElement("div");
+        card.classList.add("order-card");
+        card.style.border = "1px solid #ccc";
+        card.style.padding = "15px";
+        card.style.marginBottom = "20px";
 
-            card.innerHTML = `
+        card.innerHTML = `
             <h4>🧾 Order ID: ${order.id}</h4>
             <p><strong>Customer:</strong> ${userName}</p>
             <p><strong>Email:</strong> ${order.Email ?? "N/A"}</p>
@@ -348,16 +351,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     <option value="In process" ${order.Order_Status === "In process" ? "selected" : ""}>In process</option>
                     <option value="Delivered" ${order.Order_Status === "Delivered" ? "selected" : ""}>Delivered</option>
                 </select>
-                 <button class="update-status-btn" onclick="updateOrderStatus('${order.documentId}', document.getElementById('status-${order.documentId}').value)">
-      🔁 Update Status
-    </button>
+                <button class="update-status-btn" onclick="updateOrderStatus('${order.documentId}', document.getElementById('status-${order.documentId}').value)">
+                    🔁 Update Status
+                </button>
             </div>
             <div><strong>Products:</strong> ${productDetails}</div>
         `;
 
-            orderContainer.appendChild(card);
-        }
+        orderContainer.appendChild(card);
     }
+}
+
 
 
 
@@ -384,7 +388,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const token = localStorage.getItem("jwt");
 
         try {
-            const res = await fetch("http://localhost:1337/api/orders?populate=product", {
+            const res = await fetch("http://localhost:1337/api/orders?populate[product_detail][populate]=product", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
