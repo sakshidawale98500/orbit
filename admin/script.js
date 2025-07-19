@@ -309,17 +309,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // Orders code
     // Render orders
     function renderOrders(orders) {
-    const orderContainer = document.getElementById("admin-orders-container");
-    orderContainer.innerHTML = "";
+        const orderContainer = document.getElementById("admin-orders-container");
+        orderContainer.innerHTML = "";
 
-    for (const order of orders) {
-        const productDetailsArr = order.product_detail || [];
+        for (const order of orders) {
+            const productDetailsArr = order.product_detail || [];
 
-        let productDetails = "No products";
-        if (Array.isArray(productDetailsArr) && productDetailsArr.length > 0) {
-            productDetails = productDetailsArr.map(p => {
-                const product = p.product || {};
-                return `
+            let productDetails = "No products";
+            if (Array.isArray(productDetailsArr) && productDetailsArr.length > 0) {
+                productDetails = productDetailsArr.map(p => {
+                    const product = p.product || {};
+                    return `
                     <div class="product-item" style="margin-bottom:10px; padding:5px; border:1px solid #ddd;">
                         <p><strong>Name:</strong> ${product.Product_name || "N/A"}</p>
                         <p><strong>Price:</strong> ₹${product.Price || "N/A"}</p>
@@ -328,18 +328,18 @@ document.addEventListener("DOMContentLoaded", () => {
                         <p><strong>Quantity:</strong> ${p.Quantity || "1"}</p>
                     </div>
                 `;
-            }).join("");
-        }
+                }).join("");
+            }
 
-        const userName = userIdToName[order.user_id] || "Unknown User";
+            const userName = userIdToName[order.user_id] || "Unknown User";
 
-        const card = document.createElement("div");
-        card.classList.add("order-card");
-        card.style.border = "1px solid #ccc";
-        card.style.padding = "15px";
-        card.style.marginBottom = "20px";
+            const card = document.createElement("div");
+            card.classList.add("order-card");
+            card.style.border = "1px solid #ccc";
+            card.style.padding = "15px";
+            card.style.marginBottom = "20px";
 
-        card.innerHTML = `
+            card.innerHTML = `
             <h4>🧾 Order ID: ${order.id}</h4>
             <p><strong>Customer:</strong> ${userName}</p>
             <p><strong>Email:</strong> ${order.Email ?? "N/A"}</p>
@@ -358,9 +358,9 @@ document.addEventListener("DOMContentLoaded", () => {
             <div><strong>Products:</strong> ${productDetails}</div>
         `;
 
-        orderContainer.appendChild(card);
+            orderContainer.appendChild(card);
+        }
     }
-}
 
 
 
@@ -482,4 +482,44 @@ document.addEventListener("DOMContentLoaded", () => {
             fetchOrders();
         }
     };
+
+    window.applyOrderFilters = async function () {
+        const statusValue = document.getElementById("statusFilter").value;
+        const searchTerm = document.getElementById("searchUser").value.toLowerCase();
+        const sortBy = document.getElementById("sortOrder").value;
+
+        await fetchUsers(); // Make sure userIdToName map is available
+
+        const token = localStorage.getItem("jwt");
+        const res = await fetch("http://localhost:1337/api/orders?populate[product_detail][populate]=product", {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const data = await res.json();
+        let orders = data.data;
+
+        // 🧠 Filter by status
+        if (statusValue) {
+            orders = orders.filter(order => order.Order_Status === statusValue);
+        }
+
+        // 🔍 Filter by customer email
+        if (searchTerm) {
+            orders = orders.filter(order =>
+                order.Email?.toLowerCase().includes(searchTerm)
+            );
+        }
+
+        // 🔢 Sort by amount or latest
+        if (sortBy === "amountHigh") {
+            orders.sort((a, b) => (b.Amount || 0) - (a.Amount || 0));
+        } else if (sortBy === "amountLow") {
+            orders.sort((a, b) => (a.Amount || 0) - (b.Amount || 0));
+        } else if (sortBy === "latest") {
+            orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
+
+        renderOrders(orders);
+    };
+
 });

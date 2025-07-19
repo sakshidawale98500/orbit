@@ -85,11 +85,34 @@
 
       <hr style="margin: 40px 0;" />
 
+
+
+
       <!-- 🧾 Orders Section -->
       <div id="orders-section" class="admin-orders" style="display: none;">
         <h2>🧾 All Orders</h2>
+        <div class="filter-bar" style="margin-bottom: 20px;">
+          <select id="statusFilter">
+            <option value="">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="In process">In process</option>
+            <option value="Delivered">Delivered</option>
+          </select>
+
+          <input type="text" id="searchUser" placeholder="Search by customer email" />
+
+          <select id="sortOrder">
+            <option value="latest">Latest First</option>
+            <option value="amountHigh">Amount: High to Low</option>
+            <option value="amountLow">Amount: Low to High</option>
+          </select>
+
+          <button onclick="applyOrderFilters()">🔍 Apply Filters</button>
+        </div>
+
         <div id="admin-orders-container" class="admin-orders-container"></div>
       </div>
+
 
     </section>
   </div>
