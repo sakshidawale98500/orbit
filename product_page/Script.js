@@ -141,8 +141,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-
-  // Place Order
+  // Place Order Function
   async function placeOrder() {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
@@ -151,13 +150,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const userId = await getCurrentUserId();
-
-    if (!userId) {
-      alert("🔒 You need to log in to place an order.");
+    const payment_info = document.getElementById("order-payment").value;
+    if (!payment_info) {
+      alert("❌ Please select a payment method.");
       return;
     }
-    console.log(userId)
+
+    if (payment_info === "Online") {
+      openDummyPaymentModal(); // Show dummy modal
+      return;
+    }
+
+    actuallyContinueOrder(); // Place order directly for COD
+  }
+
+  // After Dummy Payment Confirmation
+  async function actuallyContinueOrder() {
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const userId = await getCurrentUserId();
 
     const name = document.getElementById("order-name").value.trim();
     const email = document.getElementById("order-email").value.trim();
@@ -165,18 +175,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const address = document.getElementById("order-address").value.trim();
     const payment_info = document.getElementById("order-payment").value;
 
-    if (!payment_info) {
-      alert("❌ Please select a payment method.");
-      return;
-    }
-
     const amount = cart.reduce((total, item) => total + item.price * item.quantity, 0);
-    const productIds = cart.map(item => item.id);
     const product_detail = cart.map(item => ({
       product: item.id,
-      Quantity: String(item.quantity) // ✅ lowercase 'quantity'
+      Quantity: String(item.quantity)
     }));
-
 
     const orderData = {
       data: {
@@ -187,12 +190,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         Pyment_info: payment_info,
         Amount: amount,
         Order_Status: "Pending",
-        product_detail, // 👈 this matches your component name exactly
+        product_detail,
         user_id: String(userId),
       },
     };
-
-    console.log("📦 Order Payload to Send:", JSON.stringify(orderData, null, 2));
 
     try {
       const res = await fetch("http://localhost:1337/api/orders", {
@@ -219,64 +220,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (error) {
       console.error("❌ Error placing order:", error);
       alert("❌ An unexpected error occurred.");
-
     }
   }
 
-
-  // Get User Orders
-  async function getUserOrders() {
-    const token = localStorage.getItem("jwt");
-    if (!token) {
-      alert("🔒 Please log in to view your orders.");
-      return;
-    }
-
-    // Get current user ID
-    const userId = await getCurrentUserId();
-    if (!userId) {
-      alert("❌ Failed to fetch user info.");
-      return;
-    }
-
-    try {
-      const res = await fetch("http://localhost:1337/api/orders", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await res.json();
-      const allOrders = data?.data || [];
-
-      // Filter orders by user_id (as text match)
-      const userOrders = allOrders.filter(order => order.user_id == userId);
-
-      if (userOrders.length === 0) {
-        alert("📭 You have no orders yet.");
-        return;
-      }
-
-      console.log("🧾 Your Orders:", userOrders);
-
-      // 👉 Render somewhere (update as per your HTML)
-      const userOrderContainer = document.getElementById("user-order-container");
-      userOrderContainer.innerHTML = userOrders.map(order => `
-      <div class="order-card">
-        <h4>Order ID: ${order.id}</h4>
-        <p><strong>Status:</strong> ${order.Order_Status}</p>
-        <p><strong>Total:</strong> ₹${order.Amount}</p>
-        <p><strong>Payment:</strong> ${order.Pyment_info}</p>
-        <p><strong>Placed on:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
-      </div>
-    `).join("");
-
-    } catch (err) {
-      console.error("❌ Error fetching user orders:", err);
-      alert("❌ Could not fetch orders.");
-    }
+  function continueOrderAfterDummy() {
+    closeDummyPayment();
+    actuallyContinueOrder();
   }
 
+  function openDummyPaymentModal() {
+    const modal = document.getElementById("dummy-payment-modal");
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const amount = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+    document.getElementById("dummy-payment-amount").textContent = amount;
+    modal.classList.remove("hidden");
+  }
+
+  function closeDummyPayment() {
+    const modal = document.getElementById("dummy-payment-modal");
+    if (modal) modal.classList.add("hidden");
+  }
 
   async function getCurrentUserId() {
     const token = localStorage.getItem("jwt");
@@ -291,7 +254,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     return user.id;
   }
 
+  // Expose to global scope
   window.placeOrder = placeOrder;
+  window.continueOrderAfterDummy = continueOrderAfterDummy;
+  window.closeDummyPayment = closeDummyPayment;
+  window.openDummyPaymentModal = openDummyPaymentModal;
 
   fetchProducts();
   loadCart();

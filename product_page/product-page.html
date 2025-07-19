@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -5,7 +6,117 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Avanya Desi</title>
   <link rel="stylesheet" href="./style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal.hidden {
+      display: none;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .cart-modal-content {
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      position: relative;
+    }
+
+    .cart-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+
+    .cart-items {
+      flex: 1 1 55%;
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 10px;
+      border-right: 1px solid #ccc;
+    }
+
+    .cart-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .product-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .cart-modal-content .product-card img {
+      width: 150px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+
+    .order-form {
+      flex: 1 1 40%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .order-form input,
+    .order-form select {
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .place-order-btn {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #2d472c;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .clear-cart {
+      background-color: #a83a3a;
+      color: white;
+      padding: 8px 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
@@ -17,16 +128,9 @@
     </div>
     <button id="open-cart" class="cart-link">🛒 Cart</button>
     <a href="user_orders.html" class="cart-link">🧾 My Orders</a>
-
   </header>
 
   <section class="product-section">
-   
-    <div id="product-container" class="product-container"></div>
-  </section>
-  <section class="product-section">
-    
-    
     <div id="product-container" class="product-container"></div>
   </section>
 
@@ -34,62 +138,68 @@
   <div id="cart-modal" class="cart-modal hidden">
     <div class="cart-modal-content">
       <span id="close-cart" class="close-cart">×</span>
-      <h2>Your Cart</h2>
-      <div id="cart-container" class="product-container"></div>
-      <h3 id="cart-total">Total: ₹0</h3>
-      <button id="clear-cart-btn" class="clear-cart">Clear Cart</button>
-      
-      <form id="order-form" style="margin-top: 20px;">
-        <h3>Customer Details</h3>
-        <input type="text" id="order-name" placeholder="Full Name" required /><br /><br />
-        <input type="email" id="order-email" placeholder="Email" required /><br /><br />
-        <input type="tel" id="order-phone" placeholder="Phone Number" required /><br /><br />
-        <input type="text" id="order-address" placeholder="Delivery Address" required /><br /><br />
-        <select id="order-payment" required>
-          <option value="">Select Payment Method</option>
-          <option value="COD">Cash on Delivery</option>
-          <option value="Online">Online Payment</option>
-        </select><br /><br />
-      </form>
+      <div class="cart-grid">
 
-     <button type="button" class="place-order-btn" onclick="placeOrder()">Place Order</button>
+        <!-- 🛒 Cart Section -->
+        <div class="cart-items">
+          <h2>Your Cart</h2>
+          <div id="cart-container" class="cart-container"></div>
+          <h3 id="cart-total">Total: ₹0</h3>
+          <button id="clear-cart-btn" class="clear-cart">Clear Cart</button>
+        </div>
 
+        <!-- 🧾 Customer Details -->
+        <div class="order-form">
+          <h3>Customer Details</h3>
+          <form id="order-form">
+            <input type="text" id="order-name" placeholder="Full Name" required />
+            <input type="email" id="order-email" placeholder="Email" required />
+            <input type="tel" id="order-phone" placeholder="Phone Number" required />
+            <input type="text" id="order-address" placeholder="Delivery Address" required />
+            <select id="order-payment" required>
+              <option value="">Select Payment Method</option>
+              <option value="COD">Cash on Delivery</option>
+              <option value="Online">Online Payment</option>
+            </select>
+          </form>
+          <button type="button" class="place-order-btn" onclick="placeOrder()">Proceed to Payment</button>
+        </div>
+      </div>
+
+      <!-- ✅ Dummy Payment Modal -->
+      <div id="dummy-payment-modal" class="modal hidden">
+        <div class="modal-content">
+          <h2>Dummy Payment Gateway</h2>
+          <p>Enter payment details to simulate a transaction.</p>
+          <form id="dummy-payment-form" onsubmit="event.preventDefault(); continueOrderAfterDummy();">
+            <input type="text" placeholder="Card Number" required /><br /><br />
+            <input type="text" placeholder="Name on Card" required /><br /><br />
+            <input type="text" placeholder="Expiry Date (MM/YY)" required /><br /><br />
+            <input type="text" placeholder="CVV" required /><br /><br />
+            <button type="submit">Pay ₹<span id="dummy-payment-amount">0</span></button>
+            <button type="button" onclick="closeDummyPayment()" style="margin-left: 10px;">Cancel</button>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 
-  
   <div class="background-shapes">
-  <span></span>
-  <span></span>
-  <span></span>
-  <span></span>
-  <span></span>
-</div>
-<div class="blob-background">
-  <div class="blob"></div>
-  <div class="blob"></div>
-  <div class="blob"></div>
-</div>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+  <div class="blob-background">
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+  </div>
 
-  <!-- Place Order button -->
-  <!-- <button type="button" onclick="placeOrder()">Place Order</button> -->
-
-
+  <!-- ✅ Main Logic -->
   <script src="./Script.js"></script>
-   <!--Start of Tawk.to Script-->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/685684c4552cdd190f7b503d/1iu8vd91h';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-<!--End of Tawk.to Script-->
-
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>
