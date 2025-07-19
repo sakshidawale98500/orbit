@@ -15,23 +15,37 @@
     h2 {
       text-align: center;
       color: #0f7b1c;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
+      font-size: 28px;
     }
 
     .filter-bar {
       max-width: 800px;
-      margin: 0 auto 20px;
+      margin: 0 auto 30px;
       display: flex;
-      gap: 10px;
+      gap: 12px;
       justify-content: center;
       flex-wrap: wrap;
+      align-items: center;
+      background-color: #ffffff;
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
 
     select, input {
-      padding: 8px 12px;
+      padding: 10px 14px;
       border-radius: 6px;
       border: 1px solid #ccc;
       font-size: 14px;
+      min-width: 150px;
+      background-color: #f9fafb;
+    }
+
+    label {
+      font-size: 14px;
+      margin-right: 5px;
+      color: #1e293b;
     }
 
     table {
@@ -40,46 +54,90 @@
       margin: auto;
       border-collapse: collapse;
       background-color: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
       border-radius: 10px;
       overflow: hidden;
     }
 
     th, td {
-      padding: 12px 15px;
+      padding: 14px 18px;
       text-align: left;
       border-bottom: 1px solid #eee;
+      font-size: 15px;
     }
 
     th {
       background-color: #0f7b1c;
       color: #fff;
+      text-transform: uppercase;
+      font-size: 13px;
+      letter-spacing: 0.5px;
     }
 
     tr:hover {
-      background-color: #f0fdf4;
+      background-color: #ecfdf5;
     }
 
     .no-data {
+      display: none;
       text-align: center;
-      margin-top: 30px;
-      font-size: 16px;
-      color: #999;
+      margin-top: 40px;
+      font-size: 18px;
+      color: #6b7280;
+    }
+
+    @media (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      th {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+      td {
+        border: none;
+        position: relative;
+        padding-left: 50%;
+      }
+      td:before {
+        position: absolute;
+        left: 15px;
+        top: 14px;
+        white-space: nowrap;
+        font-weight: bold;
+        color: #374151;
+      }
+      td:nth-of-type(1)::before { content: "Date"; }
+      td:nth-of-type(2)::before { content: "Action"; }
+      td:nth-of-type(3)::before { content: "Entity"; }
+      td:nth-of-type(4)::before { content: "Entity ID"; }
+      td:nth-of-type(5)::before { content: "Description"; }
     }
   </style>
 </head>
+
 <body>
 
   <h2>🧾 Product Audit Logs</h2>
 
   <div class="filter-bar">
-    <select id="actionFilter">
+    <label for="actionFilter">Action:</label>
+    <select id="actionFilter" title="Filter by Action" aria-label="Filter by Action">
       <option value="">All Actions</option>
       <option value="create">Create</option>
       <option value="update">Update</option>
       <option value="delete">Delete</option>
     </select>
-    <input type="number" id="entityIdFilter" placeholder="Search by Product ID" />
+
+    <label for="entityIdFilter">Product ID:</label>
+    <input
+      type="number"
+      id="entityIdFilter"
+      placeholder="Search by Product ID"
+      title="Search by Product ID"
+      aria-label="Search by Product ID"
+    />
   </div>
 
   <table id="logTable">
@@ -93,32 +151,36 @@
       </tr>
     </thead>
     <tbody>
-      <!-- Filled by JavaScript -->
+      <!-- Data rendered by JS -->
     </tbody>
   </table>
 
-  <div class="no-data" id="noData" style="display:none;">No logs found.</div>
+  <div class="no-data" id="noData">No logs found.</div>
 
   <script>
     async function fetchAuditLogs() {
-  try {
-    const res = await fetch("http://localhost:1337/api/audit-logs?sort[0]=createdAt:desc");
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    
-    const result = await res.json();
+      try {
+        const token = localStorage.getItem("jwt");
+        const res = await fetch("http://localhost:1337/api/audit-logs?sort[0]=createdAt:desc", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        });
 
-    if (!result.data || !Array.isArray(result.data)) {
-      console.warn("Unexpected response format:", result);
-      return [];
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const result = await res.json();
+
+        if (!result.data || !Array.isArray(result.data)) {
+          console.warn("Unexpected response format:", result);
+          return [];
+        }
+
+        return result.data;
+      } catch (error) {
+        console.error("❌ Failed to fetch audit logs:", error.message);
+        return [];
+      }
     }
-
-    return result.data;
-
-  } catch (error) {
-    console.error("❌ Failed to fetch audit logs:", error.message);
-    return [];
-  }
-}
 
     function renderLogs(logs) {
       const tbody = document.querySelector("#logTable tbody");
@@ -131,14 +193,17 @@
       }
 
       noData.style.display = "none";
-      logs.forEach(log => {
+      logs.forEach(item => {
+        const log = item.attributes;
+        const createdAt = new Date(item.attributes.createdAt).toLocaleString();
+
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${log.date}</td>
-          <td>${log.action}</td>
-          <td>${log.entity}</td>
-          <td>${log.entityId}</td>
-          <td>${log.description}</td>
+          <td>${createdAt}</td>
+          <td>${log.action || "-"}</td>
+          <td>${log.targetEntity || "-"}</td>
+          <td>${log.entityId ?? "-"}</td>
+          <td>${log.description || "-"}</td>
         `;
         tbody.appendChild(tr);
       });
@@ -149,18 +214,21 @@
       const action = document.getElementById("actionFilter").value;
       const entityId = document.getElementById("entityIdFilter").value;
 
-      const filtered = allLogs.filter(log =>
-        (!action || log.action === action) &&
-        (!entityId || String(log.entityId) === entityId)
-      );
+      const filtered = allLogs.filter(item => {
+        const log = item.attributes;
+        return (
+          (!action || log.action === action) &&
+          (!entityId || String(log.entityId) === entityId)
+        );
+      });
 
       renderLogs(filtered);
     }
 
     document.getElementById("actionFilter").addEventListener("change", loadAndFilterLogs);
     document.getElementById("entityIdFilter").addEventListener("input", loadAndFilterLogs);
-
     window.addEventListener("DOMContentLoaded", loadAndFilterLogs);
   </script>
+
 </body>
 </html>

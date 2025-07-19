@@ -3,177 +3,163 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Last 15 Days Profit Overview</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Profit Report</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      padding: 30px;
+      font-family: 'Poppins', sans-serif;
+      padding: 40px 20px;
+      background-color: #f3f4f6;
+      color: #234b2e;
     }
 
-    h2 {
+    h1 {
       text-align: center;
-      margin-bottom: 20px;
+      color: #184528;
+      margin-bottom: 10px;
     }
 
-    .chart-container {
-      background: #fff;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      max-width: 700px;
+    #totalProfit {
+      text-align: center;
+      font-size: 18px;
+      margin-bottom: 30px;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .table-container {
+      max-width: 1000px;
       margin: auto;
-    }
-
-    .total {
-      text-align: center;
-      margin: 20px 0;
-      font-size: 20px;
-      font-weight: bold;
+      background: #ffffff;
+      border-radius: 12px;
+      overflow-x: auto;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
     table {
       width: 100%;
-      margin-top: 20px;
       border-collapse: collapse;
-    }
-
-    table, th, td {
-      border: 1px solid #ccc;
+      min-width: 600px;
     }
 
     th, td {
-      padding: 10px;
-      text-align: center;
+      padding: 16px 20px;
+      text-align: left;
     }
 
     th {
-      background-color: #e0e0e0;
+      background-color: #104835;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
     }
 
-    .data-table {
-      max-width: 700px;
-      margin: 0 auto;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    tr:nth-child(even) {
+      background-color: #f9fafb;
+    }
+
+    tr:hover {
+      background-color: #ecfdf5;
+    }
+
+    .no-data {
+      text-align: center;
+      font-style: italic;
       padding: 20px;
+      color: #9ca3af;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 20px 10px;
+      }
+
+      th, td {
+        padding: 12px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <h2>📊 Last 15 Days Profit Overview</h2>
+  <h1>💰 Profit Overview</h1>
+  <div id="totalProfit">Total Profit: ₹0</div>
 
-  <div class="chart-container">
-    <canvas id="pieChart"></canvas>
-  </div>
-
-  <div class="total" id="totalProfit">Total Profit: ₹0</div>
-
-  <div class="data-table">
-    <h3 style="text-align:center;">📅 Past 15 Days Profit Data</h3>
+  <div class="table-container">
     <table id="profitTable">
       <thead>
         <tr>
-          <th>Date</th>
-          <th>Profit (₹)</th>
+          <th>#</th>
+          <th>Order ID</th>
+          <th>Name</th>
+          <th>Amount (₹)</th>
         </tr>
       </thead>
-      <tbody>
-        <!-- Filled by JavaScript -->
-      </tbody>
+      <tbody></tbody>
     </table>
   </div>
 
   <script>
-    let profitChart = null;
-    const profitAPI = 'http://localhost:1337/api/profits?sort[0]=date:desc&pagination[limit]=15';
-
     async function fetchProfitData() {
-      const response = await fetch(profitAPI);
-      const rawData = await response.json();
-
-      if (!rawData || !Array.isArray(rawData.data)) {
-        throw new Error("Invalid data from API");
-      }
-
-      return rawData.data.map(entry => ({
-        date: new Date(entry.attributes.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }),
-        profit: entry.attributes.profit
-      })).reverse();
-    }
-
-    function generateColors(count) {
-      const colors = [];
-      for (let i = 0; i < count; i++) {
-        const hue = Math.floor((360 / count) * i);
-        colors.push(`hsl(${hue}, 70%, 60%)`);
-      }
-      return colors;
-    }
-
-    function updateProfitTable(data) {
-      const tableBody = document.getElementById("profitTable").querySelector("tbody");
-      tableBody.innerHTML = "";
-      data.forEach(item => {
-        const row = document.createElement("tr");
-        row.innerHTML = `<td>${item.date}</td><td>₹${item.profit}</td>`;
-        tableBody.appendChild(row);
-      });
-    }
-
-    function updateTotalProfit(data) {
-      const total = data.reduce((acc, item) => acc + item.profit, 0);
-      document.getElementById("totalProfit").innerText = `Total Profit: ₹${total.toLocaleString()}`;
-    }
-
-    async function renderProfitChart() {
       try {
-        const data = await fetchProfitData();
-
-        const labels = data.map(item => item.date);
-        const values = data.map(item => item.profit);
-
-        const ctx = document.getElementById('pieChart').getContext('2d');
-
-        if (profitChart) {
-          profitChart.destroy();
-        }
-
-        profitChart = new Chart(ctx, {
-          type: 'pie',
-          data: {
-            labels: labels,
-            datasets: [{
-              data: values,
-              backgroundColor: generateColors(values.length)
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { position: 'bottom' },
-              tooltip: {
-                callbacks: {
-                  label: context => `${context.label}: ₹${context.parsed.toLocaleString()}`
-                }
-              }
-            }
+        const token = localStorage.getItem("jwt");
+        const res = await fetch("http://localhost:1337/api/orders?pagination[limit]=100", {
+          headers: {
+            Authorization: `Bearer ${token}`
           }
         });
 
-        updateProfitTable(data);
-        updateTotalProfit(data);
+        if (!res.ok) throw new Error("Failed to fetch profit data");
 
-      } catch (error) {
-        console.error("Profit Chart Error:", error);
-        alert("Failed to load profit chart.");
+        const result = await res.json();
+        return result.data;
+      } catch (err) {
+        console.error("❌ Error fetching profits:", err);
+        return [];
       }
     }
 
-    window.addEventListener('DOMContentLoaded', renderProfitChart);
+    function renderTable(orders) {
+      const tbody = document.querySelector("#profitTable tbody");
+      tbody.innerHTML = "";
+
+      if (!orders.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="no-data">No profit data found.</td></tr>`;
+        return;
+      }
+
+      let total = 0;
+
+      orders.forEach((order, index) => {
+        const amount = parseFloat(order.Amount) || 0;
+        const name = order.Name || `Order #${order.id}`;
+        total += amount;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${order.id}</td>
+          <td>${name}</td>
+          <td>₹${amount.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("totalProfit").textContent = `Total Profit: ₹${total.toFixed(2)}`;
+    }
+
+    async function renderProfitTable() {
+      const orders = await fetchProfitData();
+      renderTable(orders);
+    }
+
+    window.addEventListener("DOMContentLoaded", renderProfitTable);
   </script>
 
 </body>
